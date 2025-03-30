@@ -1,0 +1,139 @@
+/* todoproject/todoapp/static/todoapp/style.css */
+
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h1, h2 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+hr {
+    margin-bottom: 30px;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+/* Add Form Styling */
+.add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.add-form input[type="text"],
+.add-form textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+ .add-form textarea {
+    resize: vertical; /* Allow vertical resizing */
+    min-height: 60px;
+ }
+
+.add-form button {
+    padding: 10px 15px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+.add-form button:hover {
+    background-color: #4cae4c;
+}
+
+
+/* Todo List Styling */
+.todo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.todo-list li {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.todo-list li.completed {
+    background-color: #e0ffe0;
+    border-color: #c0e0c0;
+}
+
+.todo-list li.completed .todo-info strong {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.todo-info {
+    flex-grow: 1;
+    margin-right: 15px;
+}
+ .todo-info p {
+    margin: 5px 0 5px 0;
+    font-size: 0.9em;
+    color: #555;
+ }
+
+ .todo-info small {
+    font-size: 0.8em;
+    color: #777;
+ }
+
+.todo-actions {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+}
+
+.todo-actions button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: white;
+}
+
+.complete-btn {
+    background-color: #337ab7; /* Blue */
+}
+ .complete-btn:hover {
+    background-color: #286090;
+ }
+
+.delete-btn {
+    background-color: #d9534f; /* Red */
+}
+ .delete-btn:hover {
+    background-color: #c9302c;
+ }

@@ -1,0 +1,17 @@
+{% load static %} <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> 1 
+<title>{% block title %}Todo App{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'todoapp/style.css' %}"> </head>
+<body>
+<div class="container">
+<h1>My Django Todo App</h1>
+<hr>
+{% block content %}
+{% endblock %}
+</div>
+</body>
+</html>
+```
