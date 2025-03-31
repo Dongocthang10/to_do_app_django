@@ -2,19 +2,23 @@ from rest_framework import viewsets, permissions # Thêm permissions nếu cần
 from .models import Patient, Doctor, Appointment
 from .serializers import PatientSerializer, DoctorSerializer, AppointmentSerializer
 
-class PatientViewSet(viewsets.ReadOnlyModelViewSet):
+class PatientViewSet(viewsets.ModelViewSet):
     # ... (giữ nguyên PatientViewSet) ...
     queryset = Patient.objects.all().order_by('-created_at')
     serializer_class = PatientSerializer
 
+    permission_classes = [permissions.AllowAny]
+
 # --- Thêm DoctorViewSet ---
-class DoctorViewSet(viewsets.ReadOnlyModelViewSet): # Chỉ cho xem danh sách bác sĩ
+class DoctorViewSet(viewsets.ModelViewSet): # Chỉ cho xem danh sách bác sĩ
     """
     API endpoint allows doctors to be viewed.
     """
     queryset = Doctor.objects.all().order_by('name')
     serializer_class = DoctorSerializer
     # permission_classes = [permissions.IsAuthenticated]
+
+    permission_classes = [permissions.AllowAny]
 
 # --- Thêm AppointmentViewSet ---
 class AppointmentViewSet(viewsets.ModelViewSet): # Cho phép CRUD

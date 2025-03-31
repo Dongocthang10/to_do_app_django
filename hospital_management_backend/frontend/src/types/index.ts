@@ -38,3 +38,15 @@ export interface Patient {
       status?: 'Scheduled' | 'Completed' | 'Cancelled'; // Có thể mặc định là 'Scheduled'
       notes?: string;
   }
+
+  export interface PatientFormData{
+      name: string;
+      date_of_birth?: string | null;
+  }
+
+  export interface DoctorFormData {
+    name: string;
+    specialty?: string;
+    phone_number?: string;
+    email?: string;
+}
