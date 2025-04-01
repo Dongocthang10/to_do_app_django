@@ -1,38 +1,94 @@
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom'; // Import các thành phần router
+import React, { useContext } from 'react'; // Import useContext
+import { BrowserRouter as Router, Route, Routes, Link, useNavigate, Navigate } from 'react-router-dom';
 import PatientListPage from './pages/PatientListPage';
-import DoctorListPage from './pages/DoctorListPage'; // Import trang mới
-import AppointmentListPage from './pages/AppointmentListPage'; // Import trang mới
+import DoctorListPage from './pages/DoctorListPage';
+import AppointmentListPage from './pages/AppointmentListPage';
+import LoginPage from './pages/LoginPage'; // Import trang Login
+import ProtectedRoute from './component/ProtectedRoute';
+import { AuthContext } from './contexts/AuthContext'; // Import AuthContext
+import './index.css';
+
 
 function App() {
-  return (
-    <Router> {/* Bọc toàn bộ ứng dụng trong Router */}
-      <div className="App">
-        <nav style={{ marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid #ccc' }}>
-          <Link to="/" style={{ marginRight: '15px' }}>Home</Link>
-          <Link to="/patients" style={{ marginRight: '15px' }}>Patients</Link>
-          <Link to="/doctors" style={{ marginRight: '15px' }}>Doctors</Link>
-          <Link to="/appointments">Appointments</Link>
-        </nav>
+    const auth = useContext(AuthContext);
+    const navigate = useNavigate(); // Dùng navigate trong component con của Router
 
-        <main>
-          {/* Định nghĩa các Route */}
-          <Routes>
-             <Route path="/patients" element={<PatientListPage />} />
-             <Route path="/doctors" element={<DoctorListPage />} />
-             <Route path="/appointments" element={<AppointmentListPage />} />
-             {/* Route mặc định/Home */}
-             <Route path="/" element={
-               <div>
-                 <h2>Welcome to Hospital Management</h2>
-                 <p>Select a section from the navigation above.</p>
-               </div>
-             } />
-             {/* Thêm Route cho trang chi tiết, form sửa,... nếu cần */}
-          </Routes>
-        </main>
-      </div>
-    </Router>
-  );
+     // Component Logout Button riêng để dùng useNavigate
+    const LogoutButton = () => {
+         const authContext = useContext(AuthContext);
+         const navigate = useNavigate();
+
+         const handleLogout = () => {
+             if (authContext) {
+                authContext.logout();
+                navigate('/login'); // Chuyển về trang login sau khi logout
+             }
+         };
+
+         return <button onClick={handleLogout}>Logout</button>;
+    }
+
+
+    return (
+        // Router nên được đặt ở file index.tsx hoặc main.tsx để bao ngoài App
+        // Nếu đặt ở đây, các hook như useNavigate phải dùng trong component con
+        // <Router> <-- Bỏ Router ở đây nếu đã bọc ở index.tsx
+            <div className="App">
+                <nav style={{ marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid #ccc', display: 'flex', justifyContent: 'space-between' }}>
+                    <div>
+                        <Link to="/" style={{ marginRight: '15px' }}>Home</Link>
+                        {auth?.isAuthenticated && ( // Chỉ hiện link khi đã đăng nhập
+                            <>
+                                <Link to="/patients" style={{ marginRight: '15px' }}>Patients</Link>
+                                <Link to="/doctors" style={{ marginRight: '15px' }}>Doctors</Link>
+                                <Link to="/appointments" style={{ marginRight: '15px' }}>Appointments</Link>
+                            </>
+                        )}
+                    </div>
+                     <div>
+                        {auth?.isAuthenticated ? (
+                            <LogoutButton /> // Nút logout
+                        ) : (
+                            <Link to="/login">Login</Link> // Link đến trang login
+                        )}
+                    </div>
+                </nav>
+
+                <main>
+                    <Routes>
+                        {/* Route công khai */}
+                        <Route path="/login" element={<LoginPage />} />
+
+                        {/* Routes cần bảo vệ */}
+                        <Route element={<ProtectedRoute />}>
+                            <Route path="/patients" element={<PatientListPage />} />
+                            <Route path="/doctors" element={<DoctorListPage />} />
+                            <Route path="/appointments" element={<AppointmentListPage />} />
+                            {/* Trang chủ sau khi đăng nhập */}
+                            <Route path="/" element={
+                                <div>
+                                    <h2>Welcome back!</h2>
+                                    <p>Select a section from the navigation.</p>
+                                </div>
+                            } />
+                        </Route>
+
+                         {/* Route mặc định nếu không khớp và chưa đăng nhập */}
+                         {/* Có thể thêm trang 404 Not Found */}
+                         <Route path="*" element={ auth?.isAuthenticated ? <div>Page Not Found</div> : <Navigate to="/login" /> } />
+                    </Routes>
+                </main>
+            </div>
+        // </Router> <-- Bỏ Router ở đây nếu đã bọc ở index.tsx
+    );
 }
 
-export default App;
+ // Bọc App bằng Router nếu chưa làm ở index.tsx
+ const RootApp = () => (
+     <Router>
+         <App />
+     </Router>
+ );
+
+
+export default RootApp; 

@@ -39,8 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Thêm các app của bạn và thư viện bên thứ 3
     'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
-    'hospital_api', # Thêm app của bạn
+    'hospital_api', 
 ]
 
 MIDDLEWARE = [
@@ -64,12 +65,62 @@ CORS_ALLOWED_ORIGINS = [
 # CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
-    # Tạm thời cho phép bất kỳ ai truy cập API (để test)
-    # Trong thực tế, bạn sẽ cần cấu hình 'DEFAULT_AUTHENTICATION_CLASSES'
-    # và 'DEFAULT_PERMISSION_CLASSES'
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ]
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # Sử dụng JWT làm phương thức xác thực mặc định
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # Có thể giữ SessionAuthentication nếu bạn vẫn muốn dùng session song song
+        # 'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        # Yêu cầu xác thực (có token hợp lệ) cho hầu hết các API
+        'rest_framework.permissions.IsAuthenticated',
+        # Bạn có thể dùng 'IsAuthenticatedOrReadOnly' nếu muốn cho phép xem
+        # mà không cần đăng nhập cho một số API (cần cấu hình lại ở ViewSet)
+    )
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    # Thời gian hiệu lực của Access Token (ngắn)
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    # Thời gian hiệu lực của Refresh Token (dài hơn)
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False, # Không cấp refresh token mới mỗi lần refresh
+    "BLACKLIST_AFTER_ROTATION": False, # Không cần blacklist nếu không rotate
+
+    "ALGORITHM": "HS256", # Thuật toán ký token
+    # Khóa bí mật để ký token (mặc định dùng SECRET_KEY của Django)
+    # "SIGNING_KEY": settings.SECRET_KEY,
+    "VERIFYING_KEY": "", # Không cần nếu dùng HS256
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "JSON_ENCODER": None,
+    "JWK_URL": None,
+    "LEEWAY": 0,
+
+    "AUTH_HEADER_TYPES": ("Bearer",), # Kiểu header: "Authorization: Bearer <token>"
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id", # Trường trong model User dùng làm định danh
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+
+    "JTI_CLAIM": "jti",
+
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5), # Không dùng nếu không phải sliding token
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1), # Không dùng nếu không phải sliding token
+
+    # "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
+    # "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
+    # "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
+    # "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
+    # "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.SlidingTokenObtainSerializer",
+    # "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.SlidingTokenRefreshSerializer",
 }
 
 ROOT_URLCONF = 'hospital_management.urls'

@@ -7,7 +7,7 @@ class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all().order_by('-created_at')
     serializer_class = PatientSerializer
 
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
 # --- Thêm DoctorViewSet ---
 class DoctorViewSet(viewsets.ModelViewSet): # Chỉ cho xem danh sách bác sĩ
@@ -16,9 +16,10 @@ class DoctorViewSet(viewsets.ModelViewSet): # Chỉ cho xem danh sách bác sĩ
     """
     queryset = Doctor.objects.all().order_by('name')
     serializer_class = DoctorSerializer
+    permission_classes = [permissions.IsAdminUser]
     # permission_classes = [permissions.IsAuthenticated]
 
-    permission_classes = [permissions.AllowAny]
+    # permission_classes = [permissions.AllowAny]
 
 # --- Thêm AppointmentViewSet ---
 class AppointmentViewSet(viewsets.ModelViewSet): # Cho phép CRUD
@@ -27,7 +28,7 @@ class AppointmentViewSet(viewsets.ModelViewSet): # Cho phép CRUD
     """
     queryset = Appointment.objects.all().order_by('-appointment_time')
     serializer_class = AppointmentSerializer
-    # permission_classes = [permissions.IsAuthenticated] # Nên có quyền cụ thể hơn ở đây
+    permission_classes = [permissions.IsAuthenticated] 
 
     # Có thể thêm filter backend nếu cần, ví dụ:
     # filter_backends = [DjangoFilterBackend]
