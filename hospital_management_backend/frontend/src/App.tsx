@@ -5,6 +5,7 @@ import DoctorListPage from './pages/DoctorListPage';
 import AppointmentListPage from './pages/AppointmentListPage';
 import LoginPage from './pages/LoginPage'; // Import trang Login
 import ProtectedRoute from './component/ProtectedRoute';
+import RegisterPage from './pages/RegisterPage';
 import { AuthContext } from './contexts/AuthContext'; // Import AuthContext
 import './index.css';
 
@@ -49,7 +50,10 @@ function App() {
                         {auth?.isAuthenticated ? (
                             <LogoutButton /> // Nút logout
                         ) : (
-                            <Link to="/login">Login</Link> // Link đến trang login
+                            <>
+                            <Link to="/login">Login</Link> 
+                            <Link to="/register">Register</Link>
+                            </>
                         )}
                     </div>
                 </nav>
@@ -58,6 +62,7 @@ function App() {
                     <Routes>
                         {/* Route công khai */}
                         <Route path="/login" element={<LoginPage />} />
+                        <Route path="/register" element={<RegisterPage />} />
 
                         {/* Routes cần bảo vệ */}
                         <Route element={<ProtectedRoute />}>

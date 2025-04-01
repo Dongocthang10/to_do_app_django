@@ -50,3 +50,20 @@ export interface Patient {
     phone_number?: string;
     email?: string;
 }
+
+
+export interface RegistrationFormData {
+  username: string;
+  email: string;
+  password: string;
+  password2: string; // Password confirmation
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface UserRegistrationResponse {
+  username: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+}

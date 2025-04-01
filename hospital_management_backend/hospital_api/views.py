@@ -1,6 +1,7 @@
-from rest_framework import viewsets, permissions # Thêm permissions nếu cần
+from rest_framework import viewsets, permissions, generics
 from .models import Patient, Doctor, Appointment
-from .serializers import PatientSerializer, DoctorSerializer, AppointmentSerializer
+from .serializers import PatientSerializer, DoctorSerializer, AppointmentSerializer, RegisterSerializer
+from django.contrib.auth.models import User
 
 class PatientViewSet(viewsets.ModelViewSet):
     # ... (giữ nguyên PatientViewSet) ...
@@ -33,3 +34,8 @@ class AppointmentViewSet(viewsets.ModelViewSet): # Cho phép CRUD
     # Có thể thêm filter backend nếu cần, ví dụ:
     # filter_backends = [DjangoFilterBackend]
     # filterset_fields = ['status', 'doctor', 'patient', 'appointment_time__date']
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (permissions.AllowAny,) # Bất kỳ ai cũng có thể đăng ký
+    serializer_class = RegisterSerializer

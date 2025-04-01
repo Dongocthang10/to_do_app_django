@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 // Import các types mới
-import { Patient, Doctor, Appointment, AppointmentFormData, PatientFormData, DoctorFormData } from '../types';
+import { Patient, Doctor, Appointment, AppointmentFormData, PatientFormData, DoctorFormData, RegistrationFormData, UserRegistrationResponse } from '../types';
 
 interface LoginCredentials {
   username: string;
@@ -172,6 +172,18 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
       console.error('Login API error:', error);
       // Trả về lỗi cụ thể từ backend nếu có (vd: "No active account found with the given credentials")
       throw new Error(handleError(error, 'Login failed'));
+  }
+};
+
+export const registerUser = async (userData: RegistrationFormData): Promise<UserRegistrationResponse> => {
+  try {
+      // Gửi request đến endpoint /api/register/
+      const response = await apiClient.post<UserRegistrationResponse>('/register/', userData);
+      return response.data;
+  } catch (error) {
+      console.error('Registration API error:', error);
+      // Trả về lỗi cụ thể từ backend (vd: username exists, password mismatch - được validate ở serializer)
+      throw new Error(handleError(error, 'Registration failed'));
   }
 };
 
