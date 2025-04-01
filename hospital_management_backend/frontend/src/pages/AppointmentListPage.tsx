@@ -42,40 +42,50 @@ const AppointmentListPage: React.FC = () => {
   if (loading) return <div>Loading appointments...</div>;
 
   return (
-    <div>
-    <h1>Appointment List</h1>
+    <div className="max-w-2xl mx-auto p-6 shadow-lg rounded-lg">
+      <h1 className="text-2xl font-bold text-gray-800 mb-4">Appointment List</h1>
 
-    <AppointmentForm onAppointmentCreated={fetchAppointments} />
+      <AppointmentForm onAppointmentCreated={fetchAppointments} />
 
-    <h2 style={{marginTop: '30px'}}>Scheduled Appointments</h2>
-    {/* Hiển thị lỗi nếu có */}
-    {listError && <p style={{ color: 'red' }}>{listError}</p>}
+      <h2 className="text-xl font-semibold text-gray-700 mt-6">Scheduled Appointments</h2>
 
-    {appointments.length === 0 && !loading ? ( // Chỉ hiển thị "No appointments" khi không loading và không có lỗi
-        <p>No appointments found.</p>
-    ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-        {appointments.map((appt) => (
-            <li key={appt.id} style={{ borderBottom: '1px solid #eee', padding: '10px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div> {/* Bọc nội dung vào div để dễ dàng căn chỉnh */}
-                <strong>Patient:</strong> {appt.patient_name || 'N/A'} <br />
-                <strong>Doctor:</strong> {appt.doctor_name || 'N/A'} <br />
-                <strong>Time:</strong> {new Date(appt.appointment_time).toLocaleString()} <br />
-                <strong>Reason:</strong> {appt.reason || 'N/A'} <br />
-                <strong>Status:</strong> {appt.status}
-            </div>
-             <button
+      {listError && <p className="text-red-500 mt-2">{listError}</p>}
+
+      {appointments.length === 0 && !loading ? (
+        <p className="text-gray-500 mt-4">No appointments found.</p>
+      ) : (
+        <ul className="mt-4 divide-y divide-gray-200">
+          {appointments.map((appt) => (
+            <li key={appt.id} className="py-4 flex justify-between items-center">
+              <div>
+                <p className="text-lg font-medium text-gray-900">
+                  <strong>Patient:</strong> {appt.patient_name || "N/A"}
+                </p>
+                <p className="text-gray-700">
+                  <strong>Doctor:</strong> {appt.doctor_name || "N/A"}
+                </p>
+                <p className="text-gray-700">
+                  <strong>Time:</strong> {new Date(appt.appointment_time).toLocaleString()}
+                </p>
+                <p className="text-gray-700">
+                  <strong>Reason:</strong> {appt.reason || "N/A"}
+                </p>
+                <p className="text-gray-700">
+                  <strong>Status:</strong> {appt.status}
+                </p>
+              </div>
+              <button
                 onClick={() => handleDeleteAppointment(appt.id)}
-                style={{ backgroundColor: 'orange', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer', marginLeft: '10px' }} // Đổi màu cho khác nút Delete kia
-            >
+                className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition-all"
+              >
                 Delete/Cancel
-            </button>
+              </button>
             </li>
-        ))}
+          ))}
         </ul>
-    )}
+      )}
     </div>
-);
+  );
 };
 
 export default AppointmentListPage;

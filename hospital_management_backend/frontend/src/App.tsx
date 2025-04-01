@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import PatientListPage from './pages/PatientListPage';
 import DoctorListPage from './pages/DoctorListPage'; // Import trang mới
 import AppointmentListPage from './pages/AppointmentListPage'; // Import trang mới
-import './index.css';
 
 function App() {
   return (
