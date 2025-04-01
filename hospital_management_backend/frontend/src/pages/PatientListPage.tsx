@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback, FormEvent } from 'react';
+import React, { useState, useEffect, useCallback, useContext,  FormEvent } from 'react';
 import { Patient, PatientFormData } from '../types';
 import { getPatients, createPatient, deletePatient } from '../services/apiService';
-
+import { AuthContext } from '../contexts/AuthContext';
 const PatientListPage: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -12,19 +12,25 @@ const PatientListPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const auth = useContext(AuthContext);
+
   const fetchPatients = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+    // ... setLoading(true) ...
     try {
         const data = await getPatients();
         setPatients(data);
-    } catch (err) {
+    } catch (err: any) {
         setError('Failed to load patients.');
         console.error(err);
+        // Nếu lỗi là do session hết hạn (sau khi refresh thất bại)
+        if (err.message?.includes("Session expired") || err.message?.includes("Authentication failed")) {
+             if(auth) auth.logout(); // Gọi logout từ context
+             // Không cần navigate vì ProtectedRoute sẽ xử lý khi auth.isAuthenticated là false
+        }
     } finally {
         setLoading(false);
     }
-}, []);
+}, [auth]);
 
 useEffect(() => {
     fetchPatients();

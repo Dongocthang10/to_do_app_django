@@ -86,7 +86,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     # Thời gian hiệu lực của Refresh Token (dài hơn)
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "ROTATE_REFRESH_TOKENS": False, # Không cấp refresh token mới mỗi lần refresh
+    "ROTATE_REFRESH_TOKENS": True, # Không cấp refresh token mới mỗi lần refresh
     "BLACKLIST_AFTER_ROTATION": False, # Không cần blacklist nếu không rotate
 
     "ALGORITHM": "HS256", # Thuật toán ký token

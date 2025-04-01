@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 // Import các types mới
 import { Patient, Doctor, Appointment, AppointmentFormData, PatientFormData, DoctorFormData } from '../types';
 
@@ -9,6 +9,12 @@ interface LoginCredentials {
 interface LoginResponse {
   access: string;
   refresh: string;
+}
+
+interface RefreshResponse {
+  access: string;
+  // Một số cấu hình simplejwt có thể trả về cả refresh token mới nếu ROTATE_REFRESH_TOKENS=True
+  refresh?: string;
 }
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api';
@@ -36,7 +42,107 @@ apiClient.interceptors.request.use(
   }
 );
 
+let isRefreshing = false;
+
+let failedQueue: Array<{ resolve: (value: unknown) => void, reject: (reason?: any) => void }> = [];
+
 // Hàm lấy danh sách bệnh nhân
+
+const processQueue = (error: AxiosError | null, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+      if (error) {
+          prom.reject(error);
+      } else {
+          prom.resolve(token); // Truyền token mới để request được thử lại (không cần thiết nếu interceptor request hoạt động đúng)
+      }
+  });
+  failedQueue = [];
+};
+
+
+apiClient.interceptors.response.use(
+  // Response thành công thì trả về luôn
+  (response) => {
+      return response;
+  },
+  // Xử lý khi có lỗi response
+  async (error: AxiosError) => {
+      const originalRequest = error.config;
+
+      // Chỉ xử lý lỗi 401 Unauthorized và không phải là request đến endpoint refresh token
+      // Thêm điều kiện !originalRequest._retry để tránh lặp vô hạn nếu refresh cũng lỗi 401
+      if (error.response?.status === 401 && originalRequest && originalRequest.url !== '/token/refresh/' && !(originalRequest as any)._retry) {
+
+          if (isRefreshing) {
+              // Nếu đang refresh rồi, đưa request này vào hàng đợi
+               return new Promise((resolve, reject) => {
+                  failedQueue.push({ resolve, reject });
+               }).then(() => {
+                   // Sau khi refresh xong, thử lại request này
+                   (originalRequest as any)._retry = true; // Đánh dấu đã thử lại (dù thành công hay không)
+                   // Token mới đã được lưu, interceptor request sẽ tự lấy
+                   return apiClient(originalRequest);
+               }).catch(err => {
+                   return Promise.reject(err); // Nếu refresh thất bại
+               });
+          }
+
+          (originalRequest as any)._retry = true; // Đánh dấu để chỉ thử lại 1 lần
+          isRefreshing = true; // Bắt đầu quá trình refresh
+
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (!refreshToken) {
+              console.log('Refresh token not found, logging out.');
+              isRefreshing = false;
+               // Xử lý logout ở đây (ví dụ: gọi hàm từ context hoặc dispatch action)
+               // window.location.href = '/login'; // Cách đơn giản nhất là redirect cứng
+               // TODO: Gọi hàm logout từ AuthContext một cách an toàn
+              return Promise.reject(error); // Từ chối request gốc
+          }
+
+          try {
+              console.log('Access token expired, attempting to refresh...');
+              const response = await axios.post<RefreshResponse>(`${API_BASE_URL}/token/refresh/`, {
+                  refresh: refreshToken
+              });
+
+              const newAccessToken = response.data.access;
+              localStorage.setItem('accessToken', newAccessToken);
+              console.log('Token refreshed successfully.');
+
+              // Cập nhật header cho request gốc (không thực sự cần nếu interceptor request hoạt động)
+              // apiClient.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+              // if(originalRequest.headers) {
+              //    originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+              // }
+
+               isRefreshing = false;
+               processQueue(null, newAccessToken); // Xử lý các request chờ
+
+              // Thử lại request gốc với token mới (interceptor request sẽ tự thêm token mới)
+              return apiClient(originalRequest);
+
+          } catch (refreshError) {
+              console.error('Failed to refresh token:', refreshError);
+              isRefreshing = false;
+              processQueue(refreshError as AxiosError, null); // Báo lỗi cho các request chờ
+
+              // Xử lý logout khi refresh thất bại
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+              // TODO: Gọi hàm logout từ AuthContext một cách an toàn
+              // window.location.href = '/login';
+              alert('Your session has expired. Please log in again.'); // Thông báo cho người dùng
+
+              return Promise.reject(refreshError); // Từ chối request gốc
+          }
+      }
+
+      // Trả về lỗi cho các trường hợp khác (không phải 401 hoặc đã retry)
+      return Promise.reject(error);
+  }
+);
+
 
 const handleError = (error: unknown, defaultMessage: string): string => {
     if (axios.isAxiosError(error) && error.response) {
@@ -184,5 +290,7 @@ export const deleteAppointment = async (appointmentId: string): Promise<void> =>
       throw new Error(handleError(error, 'Failed to delete appointment'));
   }
 };
+
+
 
 // Thêm các hàm khác ở đây (getPatientById, createPatient, updatePatient, ...)
